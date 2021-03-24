@@ -20,3 +20,7 @@ clean:
 
 mrproper: clean
 	rm -rf hello
+
+comp:
+	@rm -f src.tar.xz
+	@tar -cJf src.tar.xz *.c *.h
