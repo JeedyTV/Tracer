@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "hello.h"
+#include "sys_call.h"
 #include <sys/ptrace.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -66,14 +66,11 @@ void trace_syscall(char *path){
     child = fork();
     
     if(child == 0) {
-        char dest[40];
         
         ptrace(PTRACE_TRACEME, 0, NULL, NULL);
-        
-        char src[] = " > /dev/null";
-	    strcpy(dest, path);
-	    strcat(dest, src);
-        execl("/bin/sh", "sh", "-c", dest,NULL);
+        freopen("/dev/null", "a+", stdout);
+        execl(path,get_process_name(path),NULL);
+
     }
     else{
         
@@ -95,3 +92,15 @@ void trace_syscall(char *path){
 
 }
 
+char * get_process_name(char *path){
+    
+    int index=0;
+    
+    for(int i=0;path[i] != '\0';i++){
+      
+      if (  path[i]== '/') index = i;
+    
+    }
+    return path+index+1;
+
+}

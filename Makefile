@@ -6,20 +6,17 @@ PROGRAM=tracer
 
 all: $(PROGRAM)
 
-tracer: hello.o tracee.o
-	$(CC) --static -g -o tracer hello.o tracee.o
+tracer: sys_call.o tracee.o
+	$(CC) --static -g -o tracer sys_call.o tracee.o
 
-hello.o: hello.c
-	$(CC) --static -g -o hello.o -c hello.c $(CFLAGS)
+sys_call.o: sys_call.c
+	$(CC) --static -g -o sys_call.o -c sys_call.c $(CFLAGS)
 
-tracee.o: tracee.c hello.h
+tracee.o: tracee.c sys_call.h
 	$(CC) --static -g -o tracee.o -c tracee.c $(CFLAGS)
 
 clean:
 	rm -rf *.o
-
-mrproper: clean
-	rm -rf hello
 
 comp:
 	@rm -f src.tar.xz

@@ -4,7 +4,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include "hello.h"
+#include "sys_call.h"
 #include <stdbool.h>
 
 int main(int argc, char *argv[])  
