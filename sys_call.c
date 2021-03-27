@@ -33,10 +33,8 @@ char ** get_link(void){
             fscanf(fichier, "%d %s",&sys_call_number,name_sys_call);
             
             int size=0;
-            
-            while(name_sys_call[size] != '\0') size++;
 
-            syscall[i] = malloc(sizeof(char)*size);
+            syscall[i] = malloc(sizeof(name_sys_call));
 
             strcpy(syscall[i],name_sys_call);
 
@@ -70,6 +68,7 @@ void trace_syscall(char *path){
         ptrace(PTRACE_TRACEME, 0, NULL, NULL);
         freopen("/dev/null", "a+", stdout);
         execl(path,get_process_name(path),NULL);
+        fclose(stdout);
 
     }
     else{
