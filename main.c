@@ -6,6 +6,7 @@
 #include <signal.h>
 #include <sys/user.h>
 #include <sys/reg.h>
+#include <stdbool.h>
 
 
 
@@ -34,6 +35,14 @@ int wait_(pid_t pid) {
     }
 }
 
+bool isCall(unsigned long instruction){
+    unsigned int opcode1 = instruction & 0x000000FF;
+    return (opcode1 == 0x9A || opcode1 == 0xE8 || opcode1 == 0xFF);
+}
+bool isRet(unsigned long instruction){
+    unsigned int opcode1 = instruction &0x000000FF;
+    return (opcode1 >= 0xC2 && opcode1 <= 0xC3) || (opcode1 >= 0xCA && opcode1 <= 0xCB);
+}
 int start_tracer(pid_t child){
     unsigned long instruction, ip;
     while (wait_(child) < 1) {
@@ -47,16 +56,19 @@ int start_tracer(pid_t child){
         // FUN cree une 2 focntion qui en prent opcode true si c call et true si c ret et false sinon .
 
         // count ins***
-        if(ip = ptrace(PTRACE_PEEKUSER, child, 4 * EIP, NULL) < 0){
+	
+        ip = ptrace(PTRACE_PEEKUSER, child, 4 * EIP, NULL);
+	if(ip < 0){
             perror("problem ptrace ip");
             return 1;
         }
-        if(instruction = ptrace(PTRACE_PEEKTEXT, child, ip, NULL) < 0){
+	instruction = ptrace(PTRACE_PEEKTEXT, child, ip, NULL);
+	if(instruction < 0){
             perror("problem ptrace instruction");
             return 1;
         }
         
-        printf("--%08lx--,--%08lx--\n",instruction,ip);
+        printf("--%08lx--,--%08lx--\tcall:%d,ret:%d\n",instruction,ip,isCall(instruction),isRet(instruction));
         if(ptrace(PTRACE_SINGLESTEP, child, NULL, NULL) < 0){
             perror("problem ptrace instruction");
             return 1;
