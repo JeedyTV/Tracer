@@ -19,6 +19,9 @@ int main(int argc, char *argv[])
 
         path = argv[2];
 
+        //switch
+        //change return
+
         if (argv[1][1] == 's'){
             trace_syscall(path);
             return 0;
