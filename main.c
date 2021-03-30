@@ -7,7 +7,7 @@
 #include <sys/user.h>
 #include <sys/reg.h>
 #include <stdbool.h>
-
+#include "fun_tree.h"
 
 
 #include <sys/types.h>
@@ -45,15 +45,18 @@ bool isRet(unsigned long instruction){
 }
 int start_tracer(pid_t child){
     unsigned long instruction, ip;
+    fun_tree* heap = new_fun_tree("", 0, NULL);
+
+    fun_tree* current = heap;
     while (wait_(child) < 1) {
 
-        // FUN function qui permet de lier etiquetee a l'ip
+        // TODO:FUN function qui permet de lier etiquetee a l'ip
 
         // ip - inst 
 
-        // construitre l'arbe 
+        // TODO: construitre l'arbe 
 
-        // FUN cree une 2 focntion qui en prent opcode true si c call et true si c ret et false sinon .
+        // FAIT FUN cree une 2 focntion qui en prent opcode true si c call et true si c ret et false sinon .
 
         // count ins***
 	
@@ -69,6 +72,23 @@ int start_tracer(pid_t child){
         }
         
         printf("--%08lx--,--%08lx--\tcall:%d,ret:%d\n",instruction,ip,isCall(instruction),isRet(instruction));
+	//For a new function
+	if (!current->label)
+	    current->label = get_label(instriction);
+	
+	// If calling a function
+	if(isCall(instruction)){
+	    // If recusion
+	    //current->recusion = true;
+	    //current->nb_recursions++;
+	    // Else
+	    
+	}
+	// If retunring from a function
+
+	// If continuing in the same function
+	current->nb_instructions++;
+
         if(ptrace(PTRACE_SINGLESTEP, child, NULL, NULL) < 0){
             perror("problem ptrace instruction");
             return 1;
@@ -103,7 +123,8 @@ int fork_and_trace(char *programname) {
 
 int main(int argc, char** argv)
 {
-
+    fun_tree* test_tree = new_fun_tree("instru", 1, NULL);
+    delete_fun_tree(test_tree);
     /* Run and trace program. */
     return fork_and_trace(argv[1]);
 
