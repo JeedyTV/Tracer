@@ -14,7 +14,6 @@
 #include <unistd.h>
 #include <string.h> 
 #include <sys/wait.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -22,6 +21,7 @@
 #include <sys/ptrace.h>
 #include <sys/reg.h> /* EAX, ORIG_EAX */
 #include <sys/user.h>
+#include "sys_call.h"
 
 
 int wait_(pid_t pid) {
@@ -43,12 +43,15 @@ bool isRet(unsigned long instruction){
     unsigned int opcode1 = instruction &0x000000FF;
     return (opcode1 >= 0xC2 && opcode1 <= 0xC3) || (opcode1 >= 0xCA && opcode1 <= 0xCB);
 }
-int start_tracer(pid_t child){
+int start_tracer(pid_t child,char *programname){
     unsigned long instruction, ip;
-    fun_tree* heap = new_fun_tree("", 0, NULL);
+   fun_tree* heap = new_fun_tree("", 0, NULL);
 
     fun_tree* current = heap;
-    while (wait_(child) < 1) {
+    Dic *d = get_labels_dic(programname);
+    // if want a label = get_label(d,ad_label);
+    
+   while (wait_(child) < 1) {
 
         // TODO:FUN function qui permet de lier etiquetee a l'ip
 
@@ -113,7 +116,7 @@ int fork_and_trace(char *programname) {
             perror("can't execute the tracee");
             return 1;
         }else return 0;
-    }else if (child_pid > 0) return start_tracer(child_pid);
+    }else if (child_pid > 0) return start_tracer(child_pid,programname);
     else {
         perror("problem for fork");
         return 1;
