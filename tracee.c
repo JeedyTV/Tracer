@@ -20,6 +20,15 @@ int main(int argc, char *argv[])
         path = argv[2];
 
         //switch
+        switch (argv[1][1])
+        {
+        case :
+            /* code */
+            break;
+        
+        default:
+            break;
+        }
         //change return
 
         if (argv[1][1] == 's'){
@@ -28,7 +37,7 @@ int main(int argc, char *argv[])
 
         }
         if (argv[1][1] == 'p'){
-            //call qq
+            trace_instruction(path);
             return 0;
         }
 
