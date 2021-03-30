@@ -1,5 +1,6 @@
 #include "fun_tree.h"
 #include <stdbool.h>
+#include <stdio.h>
 
 typedef struct fun_tree_t{
     char* label;
@@ -16,6 +17,7 @@ fun_tree* new_fun_tree(char *label_t, size_t depth_t, fun_tree *parent_t){
     if (!tree)
         return NULL;
 
+    tree->label = label_t;
     tree->parent = parent_t;
     tree->depth = depth_t;
     tree->nb_instructions = 0;
@@ -27,8 +29,15 @@ fun_tree* new_fun_tree(char *label_t, size_t depth_t, fun_tree *parent_t){
     return tree;
 }
 
-char* tree_to_string(fun_tree tree){
-    char* to_print 
+void print_tree(fun_tree *tree){
+    size_t d = tree->depth;
+    while(d>0)
+	printf("\t");
+    printf("%s",tree->label);
+    printf(": ");
+    printf("%d",tree->nb_instructions);
+    printf("\n");
+    //TODO: if (tree->recursion)
 }
 void delete_fun_tree(fun_tree *tree){
     if (!tree)
