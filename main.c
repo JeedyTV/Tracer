@@ -45,13 +45,13 @@ bool isRet(unsigned long instruction){
 }
 int start_tracer(pid_t child,char *programname){
     unsigned long instruction, ip;
-   fun_tree* heap = new_fun_tree("", 0, NULL);
+    fun_tree* heap = new_fun_tree(NULL, 0, NULL);
 
     fun_tree* current = heap;
     Dic *d = get_labels_dic(programname);
     // if want a label = get_label(d,ad_label);
     
-   while (wait_(child) < 1) {
+    while (wait_(child) < 1) {
 
         // TODO:FUN function qui permet de lier etiquetee a l'ip
 
@@ -75,9 +75,9 @@ int start_tracer(pid_t child,char *programname){
         }
         
         printf("--%08lx--,--%08lx--\tcall:%d,ret:%d\n",instruction,ip,isCall(instruction),isRet(instruction));
-	//For a new function
+	//For the first function (main), the label is still NULL
 	if (!current->label)
-	    current->label = get_label(instriction);
+	    current->label = get_label(d,ip);
 	
 	// If calling a function
 	if(isCall(instruction)){
@@ -85,20 +85,32 @@ int start_tracer(pid_t child,char *programname){
 	    //current->recusion = true;
 	    //current->nb_recursions++;
 	    // Else
-	    
+	    current->next = new_fun_tree(get_label(d,ip), 0, NULL);
+	    current->next->parent = current;
+	    current->next->depth = current->depth + 1;
+	    current = current->next;
 	}
 	// If retunring from a function
+	else if(isRet(instruction)){
+	    current->parent += ++current->nb_instructions;
+	    current = current->parent;
+	}
 
 	// If continuing in the same function
-	current->nb_instructions++;
+	else current->nb_instructions++;
 
         if(ptrace(PTRACE_SINGLESTEP, child, NULL, NULL) < 0){
             perror("problem ptrace instruction");
             return 1;
-        }
-
-	
+        }	
     }
+
+    current = heap;
+    while(current){
+	print_tree(current);
+	current = current->next;
+    }
+
     return 0;
 }
 
@@ -126,8 +138,8 @@ int fork_and_trace(char *programname) {
 
 int main(int argc, char** argv)
 {
-    fun_tree* test_tree = new_fun_tree("instru", 1, NULL);
-    delete_fun_tree(test_tree);
+    //fun_tree* test_tree = new_fun_tree("instru", 1, NULL);
+    //delete_fun_tree(test_tree);
     /* Run and trace program. */
     return fork_and_trace(argv[1]);
 
