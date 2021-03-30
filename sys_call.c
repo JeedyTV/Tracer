@@ -1,15 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "sys_call.h"
-#include <sys/ptrace.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <sys/user.h>
-#include <string.h>
-#include <syscall.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 
 char ** get_link(void){
 
@@ -102,4 +91,72 @@ char * get_process_name(char *path){
     }
     return path+index+1;
 
+}
+
+Dic * get_labels_dic(char * tracee_name){
+
+    char cmd[DEST_SIZE] ="nm ";
+    strcat(cmd, tracee_name);
+    strcat(cmd," > nm_tracee_result");
+    int cr = system( cmd );
+    if ( cr != 0 ){
+        fprintf( stderr, "Impossible de lancer la commande : %s\n", cmd);
+        return NULL;
+    }
+
+    
+    cr = system("wc -l nm_tracee_result > nbre_ligne");
+    if ( cr != 0 ){
+        fprintf( stderr,"Impossible de lancer la commande : wc\n");
+        return NULL;
+    }
+    
+    FILE *fichier = fopen("nbre_ligne","r");
+    int nbr_line;
+    
+    if (fichier != NULL){
+        fscanf(fichier, "%d", &nbr_line);
+
+        cr = system("rm nbre_ligne");
+        if ( cr != 0 ){
+            fprintf( stderr,"Impossible de lancer la commande : rm\n");
+            return NULL;
+        }
+
+        fclose(fichier);
+
+    }
+    
+    fichier = fopen("nm_tracee_result","r");
+    unsigned long ip;
+    char trash[30];
+    char label[30];
+    Dic * d = init_dic();
+    
+    if(d == NULL) return NULL;
+    
+    if (fichier != NULL){
+
+        for(int i=0;i<nbr_line;i++){
+
+            if(fscanf(fichier, "%08lx %s %s", &ip,trash, label)){
+                if(!add_el(d,ip,label)) return NULL;
+
+            }  
+            else{
+                fscanf(fichier, "%s %s",trash, label);
+            } 
+            
+        }
+        
+        fclose(fichier);
+    }
+
+    cr = system("rm nm_tracee_result");
+    if ( cr != 0 ){
+        fprintf( stderr, "Impossible de lancer la commande : %s\n", cmd);
+        return NULL;
+    }
+
+    return d;
 }
