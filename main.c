@@ -11,8 +11,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <string.h> 
-#include <sys/wait.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <time.h>
@@ -41,72 +39,61 @@ bool isRet(unsigned long instruction){
     unsigned int opcode1 = instruction &0x000000FF;
     return (opcode1 >= 0xC2 && opcode1 <= 0xC3) || (opcode1 >= 0xCA && opcode1 <= 0xCB);
 }
+
 int start_tracer(pid_t child,char *programname){
     unsigned long instruction, ip;
-    fun_tree* heap = new_fun_tree(NULL, 0, NULL);
+    fun_tree *heap = new_fun_tree(NULL, 0, NULL);
 
-    fun_tree* current = heap;
+    fun_tree *current = heap;
     Dic *d = get_labels_dic(programname);
-    // if want a label = get_label(d,ad_label);
-    
+
     while (wait_(child) < 1) {
-
-        // TODO:FUN function qui permet de lier etiquetee a l'ip
-
-        // ip - inst 
-
-        // TODO: construitre l'arbe 
-
-        // FAIT FUN cree une 2 focntion qui en prent opcode true si c call et true si c ret et false sinon .
-
-        // count ins***
-	
         ip = ptrace(PTRACE_PEEKUSER, child, 4 * EIP, NULL);
-	if(ip < 0){
+        if(ip < 0){
             perror("problem ptrace ip");
             return 1;
         }
-	instruction = ptrace(PTRACE_PEEKTEXT, child, ip, NULL);
-	if(instruction < 0){
+        instruction = ptrace(PTRACE_PEEKTEXT, child, ip, NULL);
+        if(instruction < 0){
             perror("problem ptrace instruction");
             return 1;
         }
-        
-        printf("--%08lx--,--%08lx--\tcall:%d,ret:%d\n",instruction,ip,isCall(instruction),isRet(instruction));
-	//For the first function (main), the label is still NULL
-	if (!current->label)
-	    current->label = get_label(d,ip);
-	
-	// If calling a function
-	if(isCall(instruction)){
-	    // If recusion
-	    //current->recusion = true;
-	    //current->nb_recursions++;
-	    // Else
-	    current->next = new_fun_tree(get_label(d,ip), 0, NULL);
-	    current->next->parent = current;
-	    current->next->depth = current->depth + 1;
-	    current = current->next;
-	}
-	// If retunring from a function
-	else if(isRet(instruction)){
-	    current->parent += ++current->nb_instructions;
-	    current = current->parent;
-	}
 
-	// If continuing in the same function
-	else current->nb_instructions++;
+        printf("--%08lx--,--%08lx--\tcall:%d,ret:%d\n",instruction,ip,isCall(instruction),isRet(instruction));
+        //For the first function (main), the label is still NULL
+        if (!current->label)
+            current->label = get_label(d,ip);
+
+        // If calling a function
+        if(isCall(instruction)){
+            // If recusion
+            //current->recusion = true;
+            //current->nb_recursions++;
+            // Else
+            current->next = new_fun_tree(get_label(d,ip), 0, NULL);
+            current->next->parent = current;
+            current->next->depth = current->depth + 1;
+            current = current->next;
+        }
+        // If retunring from a function
+        else if(isRet(instruction)){
+            current->parent += ++current->nb_instructions;
+            current = current->parent;
+        }
+
+        // If continuing in the same function
+        else current->nb_instructions++;
 
         if(ptrace(PTRACE_SINGLESTEP, child, NULL, NULL) < 0){
             perror("problem ptrace instruction");
             return 1;
-        }	
+        }
     }
 
     current = heap;
     while(current){
-	print_tree(current);
-	current = current->next;
+        print_tree(current);
+        current = current->next;
     }
 
     return 0;
@@ -114,7 +101,7 @@ int start_tracer(pid_t child,char *programname){
 
 
 int fork_and_trace(char *programname) {
-    
+
     pid_t child_pid = fork();
     if (child_pid == 0){
 
