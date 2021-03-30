@@ -44,8 +44,9 @@ int start_tracer(pid_t child,char *programname){
     unsigned long instruction, ip;
     fun_tree *heap = new_fun_tree(NULL, 0, NULL);
 
+    size_t instruction = 0;
     fun_tree *current = heap;
-    Dic *d = get_labels_dic(programname);
+    // Dic *d = get_labels_dic(programname);
 
     while (wait_(child) < 1) {
         ip = ptrace(PTRACE_PEEKUSER, child, 4 * EIP, NULL);
@@ -59,41 +60,37 @@ int start_tracer(pid_t child,char *programname){
             return 1;
         }
 
-        printf("--%08lx--,--%08lx--\tcall:%d,ret:%d\n",instruction,ip,isCall(instruction),isRet(instruction));
-        //For the first function (main), the label is still NULL
-        if (!current->label)
-            current->label = get_label(d,ip);
-
-        // If calling a function
-        if(isCall(instruction)){
-            // If recusion
-            //current->recusion = true;
-            //current->nb_recursions++;
-            // Else
-            current->next = new_fun_tree(get_label(d,ip), 0, NULL);
-            current->next->parent = current;
-            current->next->depth = current->depth + 1;
-            current = current->next;
-        }
-        // If retunring from a function
-        else if(isRet(instruction)){
-            current->parent += ++current->nb_instructions;
-            current = current->parent;
-        }
-
-        // If continuing in the same function
-        else current->nb_instructions++;
-
         if(ptrace(PTRACE_SINGLESTEP, child, NULL, NULL) < 0){
             perror("problem ptrace instruction");
             return 1;
         }
+        
+        fun_tree *father;   // The function that calls
+        fun_tree *son;      // The function that is called
+        do
+        {
+            son = current;
+            current = son->next;
+            son->nb_instructions += instruction;
+            instruction = 0;
+
+            father = current;
+            if(father) {
+                if (!father->next)
+                    father->next = new_fun_tree(NULL,0,NULL);
+                father->next = son;
+                father->nb_instructions += son->nb_instructions;
+            }
+        } while (father);
+        
     }
 
     current = heap;
-    while(current){
+    while(current != NULL){
         print_tree(current);
+        fun_tree *prec = current;
         current = current->next;
+        delete_fun_tree(prec);
     }
 
     return 0;
