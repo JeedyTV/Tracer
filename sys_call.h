@@ -18,8 +18,10 @@
 
 char ** get_link(void);
 void free_link(char ** tab);
-void trace_syscall(char *path);
+int trace_syscall(char *path);
 char * get_process_name(char *path);
 Dic * get_labels_dic(char * tracee_name);
+int trace_instruction(char * path);
+int print_syscall(pid_t child);
 
 #endif
