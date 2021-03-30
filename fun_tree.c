@@ -28,7 +28,7 @@ fun_tree* new_fun_tree(char *label_t, size_t depth_t, fun_tree *parent_t){
 }
 
 char* tree_to_string(fun_tree tree){
-    char* to_print 
+    char* to_print;
 }
 void delete_fun_tree(fun_tree *tree){
     if (!tree)

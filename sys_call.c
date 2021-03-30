@@ -15,26 +15,23 @@ char ** get_link(void){
         int num_of_sys = 385;
 
         syscall = malloc(num_of_sys*sizeof(char *));
+        if(syscall == NULL) return NULL;
         
-
         for(int i = 0; i<num_of_sys;i++){
             
             fscanf(fichier, "%d %s",&sys_call_number,name_sys_call);
-            
             int size=0;
-
             syscall[i] = malloc(sizeof(name_sys_call));
-
+            if(syscall[i] == NULL) return NULL;
             strcpy(syscall[i],name_sys_call);
-
         }
-        
+    
         fclose(fichier);
-        
+
+        return syscall;
     }
-
-    return syscall;
-
+    
+    return NULL;
 }
 
 void free_link(char ** tab){
@@ -44,39 +41,47 @@ void free_link(char ** tab){
 
 }
 
-void trace_syscall(char *path){   
+int trace_syscall(char *path){   
     
     pid_t child;
-    
     struct user_regs_struct regs;
-    
     child = fork();
     
     if(child == 0) {
-        
         ptrace(PTRACE_TRACEME, 0, NULL, NULL);
         freopen("/dev/null", "a+", stdout);
         execl(path,get_process_name(path),NULL);
         fclose(stdout);
-
+        return 0;
     }
-    else{
+    else return print_syscall(child);
+}
+
+int print_syscall(pid_t child){
         
-        int status;
+    int status;
 
-        char ** syscall = get_link();
+    char ** syscall = get_link();
+    if(syscall == NULL) return 1;
 
-        while(waitpid(child,&status,0) && ! WIFEXITED(status)) {
-          
-            ptrace(PTRACE_GETREGS, child, NULL, &regs);
-            
-            printf("syscall: %s\n",syscall[regs.orig_eax]);
-            
-            ptrace(PTRACE_SYSCALL, child, NULL, NULL);
+    while(waitpid(child,&status,0) && ! WIFEXITED(status)) {
+        
+        if(ptrace(PTRACE_GETREGS, child, NULL, &regs) < 0){
+            perror("problem ptrace instruction");
+            return 1;
         }
-
-        free_link(syscall);
+        
+        printf("syscall: %s\n",syscall[regs.orig_eax]);
+        
+        if(ptrace(PTRACE_SYSCALL, child, NULL, NULL) < 0){
+            perror("problem ptrace instruction");
+            return 1;
+        }
     }
+
+    free_link(syscall);
+
+    return 0;
 
 }
 
@@ -133,8 +138,6 @@ Dic * get_labels_dic(char * tracee_name){
     char label[30];
     Dic * d = init_dic();
     
-    if(d == NULL) return NULL;
-    
     if (fichier != NULL){
 
         for(int i=0;i<nbr_line;i++){
@@ -150,13 +153,20 @@ Dic * get_labels_dic(char * tracee_name){
         }
         
         fclose(fichier);
+
+        cr = system("rm nm_tracee_result");
+        if ( cr != 0 ){
+            fprintf( stderr, "Impossible de lancer la commande : %s\n", cmd);
+            return NULL;
+        }
+
+        return d;
     }
 
-    cr = system("rm nm_tracee_result");
-    if ( cr != 0 ){
-        fprintf( stderr, "Impossible de lancer la commande : %s\n", cmd);
-        return NULL;
-    }
+    return NULL;
+}
 
-    return d;
+int trace_instruction(char * path){
+    
+    return 0;
 }
