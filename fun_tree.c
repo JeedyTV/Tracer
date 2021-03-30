@@ -2,23 +2,14 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-typedef struct fun_tree_t{
-    char* label;
-    size_t depth;
-    size_t nb_instructions;
-    bool recursive;
-    size_t nb_recursions;
-    fun_tree* parent;
-    fun_tree* next;
-} fun_tree;
 
-fun_tree* new_fun_tree(char *label_t, size_t depth_t, fun_tree *parent_t){
+
+fun_tree *new_fun_tree(char *label_t, size_t depth_t, fun_tree *parent_t){
     fun_tree *tree = malloc(sizeof(fun_tree));
     if (!tree)
         return NULL;
 
     tree->label = label_t;
-    tree->parent = parent_t;
     tree->depth = depth_t;
     tree->nb_instructions = 0;
     tree->recursive = false;
