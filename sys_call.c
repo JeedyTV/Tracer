@@ -20,7 +20,6 @@ char ** get_link(void){
         for(int i = 0; i<num_of_sys;i++){
             
             fscanf(fichier, "%d %s",&sys_call_number,name_sys_call);
-            int size=0;
             syscall[i] = malloc(sizeof(name_sys_call));
             if(syscall[i] == NULL) return NULL;
             strcpy(syscall[i],name_sys_call);
@@ -44,9 +43,8 @@ void free_link(char ** tab){
 int trace_syscall(char *path){   
     
     pid_t child;
-    struct user_regs_struct regs;
     child = fork();
-    
+
     if(child == 0) {
         ptrace(PTRACE_TRACEME, 0, NULL, NULL);
         freopen("/dev/null", "a+", stdout);
@@ -60,7 +58,7 @@ int trace_syscall(char *path){
 int print_syscall(pid_t child){
         
     int status;
-
+    struct user_regs_struct regs;
     char ** syscall = get_link();
     if(syscall == NULL) return 1;
 
@@ -168,5 +166,6 @@ Dic * get_labels_dic(char * tracee_name){
 
 int trace_instruction(char * path){
     
+    printf("%s",path); // useless to avoid warning
     return 0;
 }

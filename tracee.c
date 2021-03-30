@@ -4,18 +4,17 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include "syscall.h"
+#include "sys_call.h"
 #include <stdbool.h>
 
 int main(int argc, char *argv[])  
 { 
     if (argc != 3){
-        // on sommace
-        printf("./tracer <mode> <prog>\n where <mode> is either -p to profile the program (profiler mode) or \n-s to get the list of system calls used by the program (syscall mode)\n");
+        printf("2 argmuents are required\n");
+        printf("./tracer <mode> <prog>\n");
         return 1;
     }
     else{
-
         char * path;
         path = argv[2];
 
@@ -28,11 +27,12 @@ int main(int argc, char *argv[])
             return trace_instruction(path);
             break;
         default:
-            printf("./tracer <mode> <prog>\n where <mode> is either -p to profile the program (profiler mode) or \n-s to get the list of system calls used by the program (syscall mode)\n");
+            printf("should use as follows :\n");
+            printf("./tracer <mode> <prog>\n");
+            printf("where <mode> is either -p or -s\n");
             return 1;
             break;
-        }
-        
+        } 
     } 
 }
 

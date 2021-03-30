@@ -1,3 +1,5 @@
+#ifndef DICTIONNARY
+#define DICTIONNARY
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -18,3 +20,5 @@ void free_dic(Dic *d);
 bool add_el(Dic *d,unsigned long ad,char *lab);
 
 char * get_label(Dic *d,unsigned long ad);
+
+#endif

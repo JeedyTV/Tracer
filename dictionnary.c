@@ -36,7 +36,7 @@ bool add_el(Dic *d,unsigned long ad,char *lab){
         unsigned long* a = malloc(sizeof(unsigned long)*d->max_size);
         if(a == NULL) return false;
         
-        for(int i=0;i<d->size;i++){
+        for(unsigned i=0;i<d->size;i++){
             a[i] = d->address[i];
         }
         
@@ -47,7 +47,7 @@ bool add_el(Dic *d,unsigned long ad,char *lab){
         char** l = malloc(sizeof(char*)*d->max_size);
         if(l == NULL) return false;
         
-        for(int i=0;i<d->size;i++){
+        for(unsigned i=0;i<d->size;i++){
             l[i] = d->label[i];
         }
     
@@ -67,7 +67,7 @@ bool add_el(Dic *d,unsigned long ad,char *lab){
 
 void free_dic(Dic *d){
   
-    for(int i=0;i<d->size-1;i++){
+    for(unsigned i=0;i<d->size-1;i++){
         free(d->label[i]);
     }
     free(d->label);
@@ -78,7 +78,7 @@ void free_dic(Dic *d){
 
 char * get_label(Dic *d,unsigned long ad){
   
-    for(int i = 0;i<d->size;i++){
+    for(unsigned i = 0;i<d->size;i++){
         
         if(d->address[i] == ad) return d->label[i];
     }
