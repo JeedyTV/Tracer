@@ -4,17 +4,18 @@
 
 
 
-fun_tree *new_fun_tree(char *label_t, size_t depth_t, fun_tree *parent_t){
+fun_tree *new_fun_tree(char *label, size_t depth, fun_tree *prev){
     fun_tree *tree = malloc(sizeof(fun_tree));
     if (!tree)
         return NULL;
 
-    tree->label = label_t;
-    tree->depth = depth_t;
+    tree->label = label;
+    tree->depth = depth;
     tree->nb_instructions = 0;
     tree->recursive = false;
-    tree->nb_recursions = 0;
-    tree->parent = parent_t;
+    tree->nb_rec_calls = 0;
+    tree->recursion_stage = 0;
+    tree->prev = prev;
     tree->next = NULL;
 
     return tree;
