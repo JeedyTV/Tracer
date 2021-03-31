@@ -42,10 +42,16 @@ bool isRet(unsigned long instruction){
 
 int start_tracer(pid_t child,char *programname){
     unsigned long instruction, ip;
-    fun_tree *heap = new_fun_tree(NULL, 0, NULL);
+    fun_tree *heap = NULL;
+    //fun_tree *heap = new_fun_tree(NULL, 0, NULL);
 
-    size_t instruction = 0;
+    size_t nb_instr = 0;
+    size_t nb_calls = 0;
+    size_t nb_returns = 0;
+    bool just_called = 0;
+    bool just_returned = 0;
     fun_tree *current = heap;
+    
     // Dic *d = get_labels_dic(programname);
 
     while (wait_(child) < 1) {
@@ -65,33 +71,71 @@ int start_tracer(pid_t child,char *programname){
             return 1;
         }
         
-        fun_tree *father;   // The function that calls
-        fun_tree *son;      // The function that is called
-        do
-        {
-            son = current;
-            current = son->next;
-            son->nb_instructions += instruction;
-            instruction = 0;
+        // fun_tree *father;   // The function that calls
+        // fun_tree *son;      // The function that is called
+        
+        ++nb_instr;
 
-            father = current;
-            if(father) {
-                if (!father->next)
-                    father->next = new_fun_tree(NULL,0,NULL);
-                father->next = son;
-                father->nb_instructions += son->nb_instructions;
+        if (just_called){
+            if (!heap){
+                printf("premier call:\n");
+                heap = new_fun_tree("le nom de l'instru", 0, NULL);
+                current = heap;
+                nb_instr = 0;
+                just_called = false;
+                ++nb_calls;
+                continue;
             }
-        } while (father);
+
+            current->nb_instructions += nb_instr;
+            nb_instr = 0;
+            if(current->label != "le nom de l'instru"){
+                printf("nouveau call:\n");
+                current->next = new_fun_tree("le nom de la nouvelle instru appelée", current->depth +1, NULL);
+                current = current->next;
+                ++nb_calls;
+            }
+            else{
+                printf("call de récursion:\n");
+                current->recursive = true;
+                current->nb_recursions++;
+            }
+            just_called = false;
+        }
+        else if(just_returned && !heap){
+
+        }
+        if (isCall(instruction)) just_called = true;
+        else if (isRet(instruction)) just_returned = true;
+        printf("--%08lx--,--%08lx--\tcall:%d,ret:%d\n",instruction,ip,nb_calls,nb_returns);
+
+        // do
+        // {
+        //     printf("--%08lx--,--%08lx--\tcall:%d,ret:%d\n",instruction,ip,isCall(instruction),isRet(instruction));
+
+        //     son = current;
+        //     current = son->next;
+        //     son->nb_instructions += instruction;
+        //     instruction = 0;
+
+        //     father = current;
+        //     if(father) {
+        //         if (!father->next)
+        //             father->next = new_fun_tree(NULL,0,NULL);
+        //         father->next = son;
+        //         father->nb_instructions += son->nb_instructions;
+        //     }
+        // } while (father);
         
     }
 
-    current = heap;
-    while(current != NULL){
-        print_tree(current);
-        fun_tree *prec = current;
-        current = current->next;
-        delete_fun_tree(prec);
-    }
+    // current = heap;
+    // while(current != NULL){
+    //     print_tree(current);
+    //     fun_tree *prec = current;
+    //     current = current->next;
+    //     delete_fun_tree(prec);
+    // }
 
     return 0;
 }
