@@ -91,22 +91,53 @@ int start_tracer(pid_t child,char *programname){
             nb_instr = 0;
             if(current->label != "le nom de l'instru"){
                 printf("nouveau call:\n");
-                current->next = new_fun_tree("le nom de la nouvelle instru appelée", current->depth +1, NULL);
+                current->next = new_fun_tree("le nom de la nouvelle instru appelée", current->depth +1, current);
                 current = current->next;
                 ++nb_calls;
             }
             else{
                 printf("call de récursion:\n");
                 current->recursive = true;
-                current->nb_recursions++;
+                current->nb_rec_calls++;
+                current->recursion_stage++;
             }
             just_called = false;
         }
         else if(just_returned && !heap){
-
+            printf("fin de la fonction\n");
+            if(current->recursive && current->recursion_stage){
+                printf("et c'est une récursion\n");
+                current->nb_instructions += nb_instr;
+                nb_instr =0;
+                current->recursion_stage--;
+            }
+            else{
+                printf("et ce n'était pas une récursion\n");
+                current->nb_instructions += nb_instr;
+                nb_instr = 0;
+                ++nb_returns;
+                if(current->prev){
+                    current->prev->subtree = current;
+                    current->prev->next = NULL;
+                    current= current->prev;
+                }
+                else{
+                    printf("dernière function");
+                    //print_tree(current);
+                    //delete_fun_tree(current);
+                    break;
+                }
+            }
+            just_returned = false;
         }
-        if (isCall(instruction)) just_called = true;
-        else if (isRet(instruction)) just_returned = true;
+        if (isCall(instruction)) {
+            printf("Y a un call\n");
+            just_called = true;            }
+        }
+        else if (isRet(instruction)){
+            printf("Y a un return\n");
+            just_returned = true;
+        }
         printf("--%08lx--,--%08lx--\tcall:%d,ret:%d\n",instruction,ip,nb_calls,nb_returns);
 
         // do

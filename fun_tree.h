@@ -9,12 +9,14 @@ typedef struct fun_tree_t{
     size_t depth;
     size_t nb_instructions;
     bool recursive;
-    size_t nb_recursions;
-    struct fun_tree_t *parent;
+    size_t nb_rec_calls;
+    size_t recursion_stage;
+    struct fun_tree_t *subtree;
+    struct fun_tree_t *prev;
     struct fun_tree_t *next;
 } fun_tree;
 
-fun_tree *new_fun_tree(char *label, size_t depth, fun_tree *parent);
+fun_tree *new_fun_tree(char *label, size_t depth, fun_tree *prev);
 
 //void update_parent(fun_tree *tree);
 
