@@ -29,35 +29,6 @@ bool isRet(unsigned long adresse,unsigned ret_addresse){
     
     return adresse == ret_addresse ;
 }
-<<<<<<< Updated upstream
-
-int start_tracer(pid_t child,char *programname){
-    unsigned long instruction, ip;
-    fun_tree *heap = new_fun_tree(NULL, 0, NULL);
-
-    fun_tree *current = heap;
-    Dic *d = get_labels_dic(programname);
-
-    while (wait_(child) < 1) {
-        ip = ptrace(PTRACE_PEEKUSER, child, 4 * EIP, NULL);
-        if(ip < 0){
-            perror("problem ptrace ip");
-            return 1;
-        }
-        instruction = ptrace(PTRACE_PEEKTEXT, child, ip, NULL);
-        if(instruction < 0){
-            perror("problem ptrace instruction");
-            return 1;
-        }
-
-        printf("--%08lx--,--%08lx--\tcall:%d,ret:%d\n",instruction,ip,isCall(instruction),isRet(instruction));
-        //For the first function (main), the label is still NULL
-        if (!current->label)
-            current->label = get_label(d,ip);
-
-        // If calling a function
-        if(isCall(instruction)){
-=======
 
 int start_tracer(pid_t child,char *programname){
     unsigned long instruction = 0;
@@ -68,7 +39,7 @@ int start_tracer(pid_t child,char *programname){
     //fun_tree* heap = new_fun_tree("", 0, NULL);
 
     //fun_tree* current = heap;
-    //Dic *d = get_labels_dic(programname);
+    Dic *d = get_labels_dic(programname);
     // if want a label = get_label(d,ad_label);
 
     int count1 = 0;
@@ -127,12 +98,11 @@ int start_tracer(pid_t child,char *programname){
         
         // If calling a function
         //if(isCall(instruction)){
->>>>>>> Stashed changes
             // If recusion
             //current->recusion = true;
             //current->nb_recursions++;
             // Else
-<<<<<<< Updated upstream
+
             current->next = new_fun_tree(get_label(d,ip), 0, NULL);
             current->next->parent = current;
             current->next->depth = current->depth + 1;
@@ -146,14 +116,12 @@ int start_tracer(pid_t child,char *programname){
 
         // If continuing in the same function
         else current->nb_instructions++;
-=======
             
         //}
 	// If retunring from a function
 
 	// If continuing in the same function
 	    //current->nb_instructions++;
->>>>>>> Stashed changes
 
         if(ptrace(PTRACE_SINGLESTEP, child, NULL, NULL) < 0){
             perror("problem ptrace instruction");
@@ -166,12 +134,11 @@ int start_tracer(pid_t child,char *programname){
         print_tree(current);
         current = current->next;
     }
-<<<<<<< Updated upstream
 
-=======
+
     free_stack(stack);
     printf("call : %d ret: %d\n",count1,count2);
->>>>>>> Stashed changes
+
     return 0;
 }
 
