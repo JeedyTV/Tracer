@@ -1,88 +1,86 @@
 #include "dictionnary.h"
 
+typedef struct Node_{
+    char *label;
+    unsigned long address;
+    Node *precedent;  
+}Node;
+
+typedef struct Dic_{
+    unsigned long size;
+    Node *head;  
+}Dic;
+
 Dic *init_dic(void){
   
-    Dic * d = malloc(sizeof(Dic));
+    Dic * d = (Dic*)malloc(sizeof(Dic));
+    assert( d != NULL );
+    
+    d->head = NULL;
 
     d->size = 0;
-    d->max_size = 1;
-    
-    d->label = malloc(sizeof(char*)*d->max_size);
-    if(d->label == NULL) return NULL;
         
-    d->address = malloc(sizeof(unsigned long)*d->max_size);
-    if(d->label == NULL) return NULL;
-    
-
     return d;
 
 }
 
 bool add_el(Dic *d,unsigned long ad,char *lab){
-  
-    if(d->size < d->max_size){
     
-        d->address[d->size] = ad;
-        d->label[d->size] = malloc(sizeof(lab));
-        if(d->label == NULL) return false;
-        strcpy(d->label[d->size],lab);
-        d->size ++;
-        return true;
-  
+    if(d->size ==0){
+        Node *n = (Node*)malloc(sizeof(Node));
+        assert( n != NULL );
+        size_t l = strlen( lab ) + 1;
+        n->label = (char *) malloc( l * sizeof(char) );
+        assert( n->label != NULL );
+        strcpy(n->label,lab);
+        n->address = ad;
+        n->precedent = NULL;
+        d->head = n;
+        d->size++;
+    
     }else{
-    
-        d->max_size *= 2;
-    
-        unsigned long* a = malloc(sizeof(unsigned long)*d->max_size);
-        if(a == NULL) return false;
+        Node *n = (Node*)malloc(sizeof(Node));
+        assert( n != NULL );
+        size_t l = strlen( lab ) + 1;
+        n->label = (char *) malloc( l * sizeof(char) );
+        assert( n->label != NULL );
+        strcpy(n->label,lab);
+        n->address = ad;
+        n->precedent = d->head;
         
-        for(unsigned i=0;i<d->size;i++){
-            a[i] = d->address[i];
-        }
-        
-        d->address = a;
-        
-        d->address[d->size] = ad;
-        
-        char** l = malloc(sizeof(char*)*d->max_size);
-        if(l == NULL) return false;
-        
-        for(unsigned i=0;i<d->size;i++){
-            l[i] = d->label[i];
-        }
-    
-        d->label = l;
-        
-        d->label[d->size] = malloc(sizeof(lab));
-        if(d->label[d->size] == NULL) return false;
-        strcpy(d->label[d->size],lab);
-        
-        d->size ++;
-        return true;
+        d->head = n;
+        d->size++;
     
     }
-  
+    
+    return true;
 
 }
 
 void free_dic(Dic *d){
   
-    for(unsigned i=0;i<d->size-1;i++){
-        free(d->label[i]);
-    }
-    free(d->label);
-    free(d->address);
-    free(d);
+    Node *n = d->head;
+        
+    while(n != NULL){
+        free(n->label);
+        Node *temp = n; 
+        n = n->precedent;
+        free(temp);
 
+    }
+  
+    free(d);
 }
 
 char * get_label(Dic *d,unsigned long ad){
   
-    for(unsigned i = 0;i<d->size;i++){
-        
-        if(d->address[i] == ad) return d->label[i];
+    Node *n = d->head;
+    
+    while(n!= NULL){
+        if(ad == n->address) return n->label;
+        n = n->precedent;
+    
     }
     
     return NULL;
-
 }

@@ -120,7 +120,7 @@ int start_tracer(pid_t child,char *programname){
                 push(stack,return_address);
                 if (!heap){
                     printf("premier call:\n");
-                    heap = new_fun_tree("le nom de l'instru", 0, NULL);
+                    heap = new_fun_tree(get_label(d,regs.eip), 0, NULL);
                     current = heap;
                     nb_instr = 0;
                     just_called = false;
@@ -130,7 +130,7 @@ int start_tracer(pid_t child,char *programname){
 
                 current->nb_instructions += nb_instr;
                 nb_instr = 0;
-                if(current->label != "le nom de l'instru"){
+                if(current->label != get_label(d,regs.eip)){
                     printf("called: %s\n",get_label(d,regs.eip));
                     current->next = new_fun_tree("le nom de la nouvelle instru appelée", current->depth +1, current);
                     current = current->next;

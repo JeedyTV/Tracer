@@ -7,7 +7,7 @@
 
 int main() {
 
-    char *prog_name = "hamza";
+    char *prog_name = "tracee";
     char cmd[DEST_SIZE] ="nm ";
     strcat(cmd, prog_name);
     strcat(cmd," > nm_tracee_result");
@@ -55,7 +55,7 @@ int main() {
         fclose(fichier);
     }
 
-    printf("label of %08lx is %s \n",0x0804840b,get_label(d,0x0804840b));
+    printf("label of %08lx is %s \n",0x080480b8,get_label(d,0x080480b8));
     
     free_dic(d);
 
