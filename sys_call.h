@@ -14,7 +14,7 @@
 #include <string.h>
 #include "dictionnary.h"
 
-#define DEST_SIZE 50
+#define DEST_SIZE 80
 
 char ** get_link(void);
 void free_link(char ** tab);

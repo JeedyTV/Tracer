@@ -20,32 +20,75 @@
 #include "sys_call.h"
 #include "stack.h"
 
-//just laisser e8 car on veut reln call
+unsigned long get_start(char * tracee_name){
+
+    char command[DEST_SIZE]="readelf --segments ";
+
+    strcat(command, tracee_name);
+
+    char * command2 = " | grep 'Entry point' > entry";
+
+    strcat(command, command2);
+
+    int cr = system(command);
+    if ( cr != 0 ){
+        fprintf(stderr, "Impossible de lancer la commande : readelf\n");
+        return 0;
+    }
+
+    char trash[DEST_SIZE];
+
+    FILE *fichier = fopen("entry","r");
+
+    unsigned long address;
+
+    fscanf(fichier,"%s %s 0x%lx",trash,trash,&address);
+
+    cr = system("rm entry");
+    if ( cr != 0 ){
+        fprintf(stderr, "Impossible de lancer la commande : rm\n");
+        return 0;
+    }
+
+    return address;
+}
+
 bool isCall(unsigned long instruction){
-    unsigned int opcode = instruction & 0x000000FF;
+    unsigned long opcode = instruction & 0x000000FF;
     return (opcode == 0xE8);
 }
+
+bool is_ret(unsigned long instruction){
+    unsigned long opcode = instruction & 0x000000FF;
+    return opcode == 0xC2 || opcode == 0xC3 || opcode == 0xCA ||
+           opcode == 0xCB || opcode == 0xCF;
+
+}
+
 bool isRet(unsigned long adresse,unsigned ret_addresse){
     
     return adresse == ret_addresse ;
 }
 
 int start_tracer(pid_t child,char *programname){
+    
     unsigned long instruction = 0;
     unsigned long ir = 0;
     struct user_regs_struct regs;
     bool called = false;
+    bool ret = false;
     Stack *stack = createStack(2);
-    //fun_tree* heap = new_fun_tree("", 0, NULL);
-
-    //fun_tree* current = heap;
     Dic *d = get_labels_dic(programname);
-    // if want a label = get_label(d,ad_label);
+    unsigned long start = get_start(programname);
+    bool started = false;
 
     int count1 = 0;
-    int count2 = 0;  
+    int count2 = 0;
+    int count3 = 0;  
 
     int status = 0;
+
+    int i = 0;
     
     while (waitpid(child,&status,0) && ! WIFEXITED(status)) {
 
@@ -76,68 +119,45 @@ int start_tracer(pid_t child,char *programname){
                 return 1;
         }
 
-        if (called) {
-            push(stack,ir);
-            called = false;
-        }
-        if(isCall(instruction)) {
-            called = true;
-            count1++;
+        if(start == regs.eip) {
+            started = true;
+            printf("THe entry point");
         }
 
-        if(isRet(regs.eip,peak(stack))) {
-            pop(stack);
-            count2++;
-        }
-        
-        //printf("%08lx %08lx ret: %08lx\n",instruction,regs.eip,ir);
-        //printf("--%08lx--,--%lu--\tcall:%d,ret:%d\n",instruction,ip,isCall(instruction),isRet(instruction));
-        //For a new function
-        //if (!current->label)
-            //current->label = get_label(instriction);
-        
-        // If calling a function
-        //if(isCall(instruction)){
-            // If recusion
-            //current->recusion = true;
-            //current->nb_recursions++;
-            // Else
+        if(started){
 
-            current->next = new_fun_tree(get_label(d,ip), 0, NULL);
-            current->next->parent = current;
-            current->next->depth = current->depth + 1;
-            current = current->next;
-        }
-        // If retunring from a function
-        else if(isRet(instruction)){
-            current->parent += ++current->nb_instructions;
-            current = current->parent;
-        }
+            i++;
 
-        // If continuing in the same function
-        else current->nb_instructions++;
+            if (called) {
+                push(stack,ir);
+                printf("called: %s\n",get_label(d,regs.eip));
+                called = false;
+            }
             
-        //}
-	// If retunring from a function
+            if(isCall(instruction)) {
+                
+                called = true;
+                count1++;
+            }
 
-	// If continuing in the same function
-	    //current->nb_instructions++;
+            
+            if(isRet(regs.eip,peak(stack))){
+                printf("ret\n");
+                pop(stack);
+                count3++;
+            }
+
+        }
 
         if(ptrace(PTRACE_SINGLESTEP, child, NULL, NULL) < 0){
             perror("problem ptrace instruction");
             return 1;
         }
-    }
 
-    current = heap;
-    while(current){
-        print_tree(current);
-        current = current->next;
     }
-
 
     free_stack(stack);
-    printf("call : %d ret: %d\n",count1,count2);
+    printf("call : %d ret: %d\n",count1,count3);
 
     return 0;
 }
@@ -166,8 +186,7 @@ int fork_and_trace(char *programname) {
 
 int main(int argc, char** argv)
 {
-    //fun_tree* test_tree = new_fun_tree("instru", 1, NULL);
-    //delete_fun_tree(test_tree);
+    
     /* Run and trace program. */
     return fork_and_trace(argv[1]);
 
