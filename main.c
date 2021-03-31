@@ -103,7 +103,7 @@ int start_tracer(pid_t child,char *programname){
             }
             just_called = false;
         }
-        else if(just_returned && !heap){
+        else if(just_returned && heap){
             printf("fin de la fonction\n");
             if(current->recursive && current->recursion_stage){
                 printf("et c'est une récursion\n");
@@ -132,7 +132,7 @@ int start_tracer(pid_t child,char *programname){
         }
         if (isCall(instruction)) {
             printf("Y a un call\n");
-            just_called = true;            }
+            just_called = true;
         }
         else if (isRet(instruction)){
             printf("Y a un return\n");
