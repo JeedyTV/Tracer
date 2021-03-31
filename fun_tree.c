@@ -22,17 +22,39 @@ fun_tree *new_fun_tree(char *label, size_t depth, fun_tree *prev){
 }
 
 void print_tree(fun_tree *tree){
-    size_t d = tree->depth;
-    while(d>0)
-	printf("\t");
-    printf("%s",tree->label);
-    printf(": ");
-    printf("%d",tree->nb_instructions);
-    printf("\n");
-    //TODO: if (tree->recursion)
+    if (!tree)
+        return;
+    for (size_t d = 0; d < tree->depth*4; d++)
+        printf(" ");
+
+    if(!tree->recursive)
+        printf("%s: %u\n", tree->label, tree->nb_instructions);
+    else
+        printf("%s [rec call: %u]: %u\n", tree->label, tree->nb_rec_calls, tree->nb_instructions);
+    
+    fun_tree *subtree = tree->subtree;
+    while(subtree){
+        print_tree(subtree);
+        subtree = subtree->next;
+    }
+
+    if(tree->next)
+        print_tree(tree->next);
 }
+
 void delete_fun_tree(fun_tree *tree){
     if (!tree)
-	return;
+	    return;
+
+    fun_tree *subtree = tree->subtree;
+    while(subtree){
+        fun_tree *tmp = subtree->next;
+        delete_fun_tree(subtree);
+        subtree = tmp;
+    }
+
+    if(tree->next)
+        delete_fun_tree(tree->next);
+
     free(tree);
 }

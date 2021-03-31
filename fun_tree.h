@@ -18,8 +18,6 @@ typedef struct fun_tree_t{
 
 fun_tree *new_fun_tree(char *label, size_t depth, fun_tree *prev);
 
-//void update_parent(fun_tree *tree);
-
 void print_tree(fun_tree *tree);
 
 void delete_fun_tree(fun_tree *tree);  
