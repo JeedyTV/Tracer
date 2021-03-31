@@ -44,7 +44,7 @@ int trace_syscall(char *path){
     
     pid_t child;
     child = fork();
-
+//cond neg error
     if(child == 0) {
         ptrace(PTRACE_TRACEME, 0, NULL, NULL);
         freopen("/dev/null", "a+", stdout);
