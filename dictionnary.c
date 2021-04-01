@@ -74,6 +74,8 @@ void free_dic(Dic *d){
 
 char * get_label(Dic *d,unsigned long ad){
   
+    if(d == NULL) return NULL;
+    
     Node *n = d->head;
     
     while(n!= NULL){

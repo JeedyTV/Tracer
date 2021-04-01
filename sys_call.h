@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "dictionnary.h"
+#include <assert.h>
 
 #define DEST_SIZE 80
 
@@ -20,7 +21,7 @@ char ** get_link(void);
 void free_link(char ** tab);
 int trace_syscall(char *path);
 char * get_process_name(char *path);
-Dic * get_labels_dic(char * tracee_name);
+Dic * get_labels_dic(char * tracee_name,char * regex);
 int trace_instruction(char * path);
 int print_syscall(pid_t child);
 

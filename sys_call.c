@@ -96,10 +96,12 @@ char * get_process_name(char *path){
 
 }
 
-Dic * get_labels_dic(char * tracee_name){
+Dic * get_labels_dic(char * tracee_name,char * regex){
 
     char cmd[DEST_SIZE] ="nm ";
     strcat(cmd, tracee_name);
+    strcat(cmd," | grep -E ");
+    strcat(cmd,regex);
     strcat(cmd," > nm_tracee_result");
     int cr = system( cmd );
     if ( cr != 0 ){
@@ -169,3 +171,4 @@ int trace_instruction(char * path){
     printf("%s",path); // useless to avoid warning
     return 0;
 }
+

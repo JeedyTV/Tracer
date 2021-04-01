@@ -77,7 +77,8 @@ int start_tracer(pid_t child,char *programname){
     bool just_called = false;
     bool just_returned = false;
     Stack *stack = createStack(2);
-    Dic *d = get_labels_dic(programname);
+    Dic *dic_t = get_labels_dic(programname,"' T | t '");
+    Dic *dic_w = get_labels_dic(programname,"' W | w '");
     unsigned long start = get_start(programname);
     bool started = false;
     fun_tree *current = heap;
@@ -109,7 +110,7 @@ int start_tracer(pid_t child,char *programname){
 
         if(start == regs.eip) {
             started = true;
-            printf("THe entry point\n");
+            printf("The entry point ");
         }
 
 
@@ -117,32 +118,70 @@ int start_tracer(pid_t child,char *programname){
             nb_instr++;
 
             if (just_called){
-                push(stack,return_address);
-                if (!heap){
+                char * t_label = get_label(dic_t,regs.eip);
+                char * w_label = get_label(dic_w,regs.eip);
+
+                if(t_label){
+                    //count1++;
+                    push(stack,return_address);
+
+                    if (!heap){
+                    just_called = false;
                     printf("premier call:\n");
-                    heap = new_fun_tree(get_label(d,regs.eip), 0, NULL);
+                    heap = new_fun_tree(t_label, 0, NULL);
                     current = heap;
                     nb_instr = 0;
-                    just_called = false;
                     ++nb_calls;
                     continue;
-                }
+                    }
 
-                current->nb_instructions += nb_instr;
-                nb_instr = 0;
-                if(current->label != get_label(d,regs.eip)){
-                    printf("called: %s\n",get_label(d,regs.eip));
-                    current->next = new_fun_tree("le nom de la nouvelle instru appelée", current->depth +1, current);
-                    current = current->next;
+                    current->nb_instructions += nb_instr;
+                    nb_instr = 0;
+                    if(current->label != t_label){
+                        printf("called: %s\n",t_label);
+                        current->next = new_fun_tree("le nom de la nouvelle instru appelée", current->depth +1, current);
+                        current = current->next;
+                        ++nb_calls;
+                    }
+                    else{
+                        printf("call de récursion:\n");
+                        current->recursive = true;
+                        current->nb_rec_calls++;
+                        current->recursion_stage++;
+                    }
+                    just_called = false;
+
+                }else if(w_label){
+                    //count1++;
+                    push(stack,return_address);
+                    if (!heap){
+                    just_called = false;
+                    printf("premier call:\n");
+                    heap = new_fun_tree(w_label, 0, NULL);
+                    current = heap;
+                    nb_instr = 0;
                     ++nb_calls;
+                    continue;
+                    }
+
+                    current->nb_instructions += nb_instr;
+                    nb_instr = 0;
+                    if(current->label != w_label){
+                        printf("called: %s\n",w_label);
+                        current->next = new_fun_tree("le nom de la nouvelle instru appelée", current->depth +1, current);
+                        current = current->next;
+                        ++nb_calls;
+                    }
+                    else{
+                        printf("call de récursion:\n");
+                        current->recursive = true;
+                        current->nb_rec_calls++;
+                        current->recursion_stage++;
+                    }
+                    just_called = false;
+
                 }
-                else{
-                    printf("call de récursion:\n");
-                    current->recursive = true;
-                    current->nb_rec_calls++;
-                    current->recursion_stage++;
-                }
-                just_called = false;
+                
             }
             else if(just_returned && heap){
                 printf("fin de la fonction\n");
@@ -172,7 +211,7 @@ int start_tracer(pid_t child,char *programname){
                 just_returned = false;
             }
             if (isCall(instruction)) {
-                printf("called: %s\n",get_label(d,regs.eip));
+                printf("called: %s\n",t_label);
                 just_called = true;
             }
             else if(isRet(regs.eip,peak(stack))){
@@ -182,35 +221,12 @@ int start_tracer(pid_t child,char *programname){
             }
             //printf("--%08lx--,--%08lx--\tcall:%d,ret:%d\n",instruction,ip,nb_calls,nb_returns);
         }
-        // do
-        // {
-        //     printf("--%08lx--,--%08lx--\tcall:%d,ret:%d\n",instruction,ip,isCall(instruction),isRet(instruction));
-
-        //     son = current;
-        //     current = son->next;
-        //     son->nb_instructions += instruction;
-        //     instruction = 0;
-
-        //     father = current;
-        //     if(father) {
-        //         if (!father->next)
-        //             father->next = new_fun_tree(NULL,0,NULL);
-        //         father->next = son;
-        //         father->nb_instructions += son->nb_instructions;
-        //     }
-        // } while (father);
         
     }
 
-    // current = heap;
-    // while(current != NULL){
-    //     print_tree(current);
-    //     fun_tree *prec = current;
-    //     current = current->next;
-    //     delete_fun_tree(prec);
-    // }
     free_stack(stack);
     free_dic(d);
+    printf("call : %d ret: %d\n",nb_calls,nb_returns);
     return 0;
 }
 
@@ -238,8 +254,6 @@ int fork_and_trace(char *programname) {
 
 int main(int argc, char** argv)
 {
-    //fun_tree* test_tree = new_fun_tree("instru", 1, NULL);
-    //delete_fun_tree(test_tree);
     /* Run and trace program. */
     return fork_and_trace(argv[1]);
 
