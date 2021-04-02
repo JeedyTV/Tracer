@@ -144,7 +144,7 @@ size_t get_start(char * tracee_name){
 
 bool isCall(size_t instruction){
     unsigned int opcode1 = instruction & 0x000000FF;
-    return (opcode1 == 0x9A || opcode1 == 0xE8 || opcode1 == 0xFF);
+    return (opcode1 == 0xE8);
 }
 
 bool isRet(size_t adresse,unsigned ret_addresse){
