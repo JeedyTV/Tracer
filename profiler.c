@@ -112,39 +112,6 @@ Dic * get_labels_dic_o(char * tracee_name){
     return dic;    
 }
 
-size_t get_start(char * tracee_name){
-
-    /* writing command */
-    char command[BUFFER_SIZE]="objdump -f ";
-    strcat(command, tracee_name);
-
-    char * command2 = " | grep 'start' > entry";    /* start the tracee process */
-    strcat(command, command2);
-
-    /* excute command */
-    int cr = system(command);
-    if ( cr != 0 ){ /* Unexpected behaviour */
-        fprintf(stderr, "Impossible de lancer la commande : %s\n",command);
-        exit(1);
-    }
-
-    char buffer[BUFFER_SIZE];
-
-    FILE *fichier = fopen("entry","r");
-
-    long unsigned address;  /* entry point address */
-
-    fscanf(fichier,"%s %s 0x%08lx",buffer,buffer,&address);
-
-    cr = system("rm entry");
-    if ( cr != 0 ){ /* Unexpected behaviour */
-        fprintf(stderr, "Impossible de lancer la commande : rm\n");
-        exit(1);
-    }
-
-    return address;
-}
-
 bool isCall(size_t instruction){
     unsigned int opcode1 = instruction & 0x000000FF;
     /* opcodes used to detect a call */
@@ -171,7 +138,6 @@ int start_tracer_p(pid_t child,char *programname){
     Dic *dic_w = get_labels_dic(programname,"' W | w '");
 
     /* starting the process */
-    long start = get_start(programname);
     bool started = false;   /* true when the current instruction has passed the entry point */
     
     int status = 0;         /* for the wait */
@@ -193,7 +159,7 @@ int start_tracer_p(pid_t child,char *programname){
         
         return_address = ptrace(PTRACE_PEEKTEXT, child, regs.esp, NULL);
         
-        if(start == regs.eip) {
+        if(!started) {
             started = true;
             heap = new_fun_tree(get_label(dic_t,regs.eip), 0, NULL,return_address);
             current = heap;

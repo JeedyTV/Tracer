@@ -78,12 +78,14 @@ char * get_label(Dic *d,unsigned long ad){
     if(d == NULL) return NULL;
     
     Node *n = d->head;
+
+    char * label = NULL;
     
     while(n!= NULL){
-        if(ad == n->address) return n->label;
+        if(ad == n->address) label = n->label;
         n = n->precedent;
-    
     }
-    
-    return NULL;
+
+    if(label) return label;
+    else return NULL;
 }

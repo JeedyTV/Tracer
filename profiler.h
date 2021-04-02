@@ -39,13 +39,6 @@ Dic * get_labels_dic(char * tracee_name,char * regex);
 Dic * get_labels_dic_o(char * tracee_name);
 
 /**
- * Starts a process.
- * @param tracee_name the name of the process
- * @return address of the entry point of the process
- */
-size_t get_start(char * tracee_name);
-
-/**
  * Detectes a call instruction.
  * @param intruction opcode of an instruction
  * @return true if is a call function, false otherwise.

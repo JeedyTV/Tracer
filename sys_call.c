@@ -41,32 +41,74 @@ void free_link(char ** tab){
     free(tab);
 }
 
+int wait_syscall(pid_t child){
+
+    int status;
+    int error = 0;
+    
+    while(1){
+
+        error = ptrace(PTRACE_SYSCALL, child, 0,0);
+        if(error == -1){
+            return error;
+        }
+
+        waitpid(child,&status,0);
+
+
+        if(WIFSTOPPED(status) && WSTOPSIG(status) & 0x80){
+            return 0;
+        }
+
+        if (WIFEXITED(status)){
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 int start_tracer_s(pid_t child){
         
-    int status;     /* for the wait */
-    struct user_regs_struct regs;   /* the current address data */
     char ** syscall = get_link();   /* contains syscal names */
     if(syscall == NULL) return 1;
+    
+    int status;     /* for the wait */
+    int error= 0;
+    int sys_call;
+    int ret;
 
-    /* Loop until the child process finishes 
-        Each iteration advances the process to the next
-        entry to (or exit from) a syscall */
-    while(waitpid(child,&status,0) && ! WIFEXITED(status)) {
-        
-        /* Copy the tracee's general-purpose registers, to the regs in the tracer */
-        if(ptrace(PTRACE_GETREGS, child, NULL, &regs) < 0){
-            perror("problem ptrace instruction");
-            exit(1);
+    error = waitpid(child,&status,0);
+    if(error == -1){
+        return error;
+    }
+
+    error = ptrace(PTRACE_SETOPTIONS, child, 0, PTRACE_O_TRACESYSGOOD);
+	if (error == -1) {
+		return error;
+	}
+
+    sys_call = ptrace(PTRACE_PEEKUSER, child, sizeof(long) * ORIG_EAX);
+    printf("syscall: %s\n",syscall[sys_call]);
+
+    while (1)
+    {
+        error = wait_syscall(child);
+        if(error != 0){
+            break;
         }
-        
-        /* print according to the protocol */
-        printf("syscall: %s\n",syscall[regs.orig_eax]);
-        
-        /* Inspect the return value of the system call */
-        if(ptrace(PTRACE_SYSCALL, child, NULL, NULL) < 0){
-            perror("problem ptrace instruction");
-            exit(1);
-        }
+
+        sys_call = ptrace(PTRACE_PEEKUSER, child, sizeof(long) * ORIG_EAX);
+        printf("syscall: %s\n",syscall[sys_call]);
+
+        error = wait_syscall(child);
+		if (error != 0) {
+			break;
+		}
+
+        ptrace(PTRACE_PEEKUSER, child, sizeof(long) * EAX);
+		
+
     }
 
     free_link(syscall);
