@@ -1,19 +1,11 @@
 #include "dictionnary.h"
 
-typedef struct Node_{
-    char *label;
-    unsigned long address;
-    Node *precedent;  
-}Node;
 
-typedef struct Dic_{
-    unsigned long size;
-    Node *head;  
-}Dic;
 
 Dic *init_dic(void){
   
     Dic * d = (Dic*)malloc(sizeof(Dic));
+    
     assert( d != NULL );
     
     d->head = NULL;
@@ -28,9 +20,11 @@ bool add_el(Dic *d,unsigned long ad,char *lab){
     
     if(d->size ==0){
         Node *n = (Node*)malloc(sizeof(Node));
+        
         assert( n != NULL );
         size_t l = strlen( lab ) + 1;
         n->label = (char *) malloc( l * sizeof(char) );
+        
         assert( n->label != NULL );
         strcpy(n->label,lab);
         n->address = ad;
@@ -40,9 +34,11 @@ bool add_el(Dic *d,unsigned long ad,char *lab){
     
     }else{
         Node *n = (Node*)malloc(sizeof(Node));
+        
         assert( n != NULL );
         size_t l = strlen( lab ) + 1;
         n->label = (char *) malloc( l * sizeof(char) );
+        
         assert( n->label != NULL );
         strcpy(n->label,lab);
         n->address = ad;
@@ -58,18 +54,23 @@ bool add_el(Dic *d,unsigned long ad,char *lab){
 }
 
 void free_dic(Dic *d){
+ 
+    if(d == NULL)return;
   
     Node *n = d->head;
         
     while(n != NULL){
         free(n->label);
+        
         Node *temp = n; 
         n = n->precedent;
         free(temp);
+        
 
     }
   
     free(d);
+    
 }
 
 char * get_label(Dic *d,unsigned long ad){

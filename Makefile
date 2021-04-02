@@ -6,10 +6,10 @@ PROGRAM=tracer
 
 all: $(PROGRAM)
 
-tracer: sys_call.o tracee.o dictionnary.o stack.o
-	$(CC) --static -g -o tracer sys_call.o tracee.o dictionnary.o stack.o
+tracer: sys_call.o tracee.o dictionnary.o stack.o fun_tree.o profiler.o tracer.o
+	$(CC) --static -g -o tracer sys_call.o tracee.o dictionnary.o stack.o fun_tree.o profiler.o tracer.o
 
-sys_call.o: sys_call.c
+sys_call.o: sys_call.c 
 	$(CC) --static -g -o sys_call.o -c sys_call.c $(CFLAGS)
 
 dictionnary.o: dictionnary.c
@@ -18,7 +18,16 @@ dictionnary.o: dictionnary.c
 stack.o: stack.c
 	$(CC) --static -g -o stack.o -c stack.c $(CFLAGS)
 
-tracee.o: tracee.c sys_call.h
+fun_tree.o: fun_tree.c
+	$(CC) --static -g -o fun_tree.o -c fun_tree.c $(CFLAGS)
+
+tracer.o: tracer.c sys_call.h profiler.h
+	$(CC) --static -g -o tracer.o -c tracer.c $(CFLAGS)
+
+profiler.o: profiler.c stack.h fun_tree.h dictionnary.h
+	$(CC) --static -g -o profiler.o -c profiler.c $(CFLAGS)
+
+tracee.o: tracee.c tracer.h
 	$(CC) --static -g -o tracee.o -c tracee.c $(CFLAGS)
 
 clean:
@@ -26,4 +35,4 @@ clean:
 
 comp:
 	@rm -f src.tar.xz
-	@tar -cJf src.tar.xz *.c *.h
+	@tar -cJf src.tar.xz *.c *.h *.pdf

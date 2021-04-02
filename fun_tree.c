@@ -3,11 +3,10 @@
 #include <stdio.h>
 
 
-
-fun_tree *new_fun_tree(char *label, size_t depth, fun_tree *prev){
-    fun_tree *tree = malloc(sizeof(fun_tree));
-    if (!tree)
-        return NULL;
+fun_tree *new_fun_tree(char *label, size_t depth, fun_tree *prev,unsigned long ret_ad){
+    fun_tree *tree = (fun_tree *)malloc(sizeof(fun_tree));
+    
+    assert( tree != NULL);
 
     tree->label = label;
     tree->depth = depth;
@@ -16,12 +15,17 @@ fun_tree *new_fun_tree(char *label, size_t depth, fun_tree *prev){
     tree->nb_rec_calls = 0;
     tree->recursion_stage = 0;
     tree->prev = prev;
-    tree->next = NULL;
+    tree->sub_size_max = 1000;
+    tree->subtree =  (fun_tree **)malloc(sizeof(fun_tree *)*tree->sub_size_max);
+    
+    tree->sub_size = 0;
+    tree->return_address = ret_ad;
 
     return tree;
 }
 
 void print_tree(fun_tree *tree){
+    
     if (!tree)
         return;
     for (size_t d = 0; d < tree->depth*4; d++)
@@ -32,29 +36,56 @@ void print_tree(fun_tree *tree){
     else
         printf("%s [rec call: %u]: %u\n", tree->label, tree->nb_rec_calls, tree->nb_instructions);
     
-    fun_tree *subtree = tree->subtree;
-    while(subtree){
-        print_tree(subtree);
-        subtree = subtree->next;
+    for(int i = 0 ; i<tree->sub_size;i++){
+        print_tree(tree->subtree[i]);
     }
 
-    if(tree->next)
-        print_tree(tree->next);
+
+    
 }
 
 void delete_fun_tree(fun_tree *tree){
     if (!tree)
 	    return;
 
-    fun_tree *subtree = tree->subtree;
-    while(subtree){
-        fun_tree *tmp = subtree->next;
-        delete_fun_tree(subtree);
-        subtree = tmp;
+    for(int i =0;i<tree->sub_size;i++){
+        delete_fun_tree(tree->subtree[i]);
     }
-
-    if(tree->next)
-        delete_fun_tree(tree->next);
+    free(tree->prev);
+    
 
     free(tree);
+    
+}
+
+// To add an element at the end
+void add(fun_tree *tree, fun_tree *element){
+    
+    if (tree->sub_size == tree->sub_size_max){
+
+        fun_tree **tab = (fun_tree **)malloc(sizeof(fun_tree *)*tree->sub_size_max*2);
+        
+        assert( tab != NULL );
+        for(int i=0;i<tree->sub_size_max;i++){
+            tab[i] = tree->subtree[i];
+        }
+        free(tree->subtree);
+        
+        tree->subtree = tab;
+        tree->subtree[tree->sub_size] = element;
+        tree->sub_size++;
+        tree->sub_size_max *= 2;
+
+    }
+    else{
+        tree->subtree[tree->sub_size] = element;
+        tree->sub_size++;
+    }
+}
+// To add a recursion
+void add_rec(fun_tree *tree){
+    assert(tree != NULL);
+    tree->recursive = true;
+    tree->nb_rec_calls++;
+    tree->recursion_stage++;
 }

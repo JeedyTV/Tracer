@@ -6,8 +6,18 @@
 #include <stdbool.h>
 #include <assert.h>
 
-typedef struct Node_ Node;
-typedef struct Dic_ Dic;
+
+typedef struct Node_t{
+    char *label;
+    unsigned long address;
+    struct Node_t *precedent;  
+}Node;
+
+
+typedef struct {
+    unsigned long size;
+    Node *head;  
+}Dic;
 
 Dic *init_dic(void);
 

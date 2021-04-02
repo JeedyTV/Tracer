@@ -3,11 +3,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "fun_tree.h"
 
 typedef struct  {
     int top;
-    unsigned capacity;
-    unsigned long* array;
+    int capacity;
+    fun_tree** array;
 }Stack;
 
 Stack* createStack(unsigned capacity);
@@ -16,11 +17,11 @@ int isFull(Stack* stack);
 
 int isEmpty(Stack* stack);
 
-void push(Stack* stack, int item);
+void push(Stack* stack, fun_tree* item);
 
-int pop(Stack* stack);
+fun_tree* pop(Stack* stack);
 
-int peak(Stack* stack);
+fun_tree* peak(Stack* stack);
 
 void free_stack(Stack *s);
 

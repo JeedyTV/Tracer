@@ -4,7 +4,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include "sys_call.h"
+#include "tracer.h"
 #include <stdbool.h>
 
 int main(int argc, char *argv[])  
@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     if (argc != 3){
         printf("2 argmuents are required\n");
         printf("./tracer <mode> <prog>\n");
-        return 1;
+        exit(1);
     }
     else{
         char * path;
@@ -21,16 +21,16 @@ int main(int argc, char *argv[])
         switch (argv[1][1])
         {
         case 's':
-            return trace_syscall(path);
+            return start_tracer(path,'s');
             break;
         case 'p':
-            return trace_instruction(path);
+            return start_tracer(path,'p');
             break;
         default:
             printf("should use as follows :\n");
             printf("./tracer <mode> <prog>\n");
             printf("where <mode> is either -p or -s\n");
-            return 1;
+            exit(1);
             break;
         } 
     } 

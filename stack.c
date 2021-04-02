@@ -4,13 +4,16 @@
 
 #include "stack.h"
 
+
 Stack* createStack(unsigned capacity)
 {
     Stack* stack = (Stack*)malloc(sizeof(Stack));
+    
     assert( stack != NULL );
     stack->capacity = capacity;
     stack->top = -1;
-    stack->array = (unsigned long*)malloc(stack->capacity * sizeof(unsigned long));
+    stack->array = (fun_tree**)malloc(stack->capacity * sizeof(fun_tree*));
+    
     assert(  stack->array != NULL );
     return stack;
 }
@@ -28,17 +31,19 @@ int isEmpty(Stack* stack)
 }
  
 // Function to add an item to stack.  It increases top by 1
-void push(Stack* stack, int item)
+void push(Stack* stack, fun_tree* item)
 {
     if (isFull(stack)){
 
         
-        unsigned long *tab = (unsigned long*)malloc(stack->capacity * 2 *sizeof(unsigned long));
+        fun_tree* *tab = (fun_tree**)malloc(stack->capacity * 2 *sizeof(fun_tree*));
+        
         assert( tab != NULL );
         for(int i=0;i<stack->capacity;i++){
             tab[i] = stack->array[i];
         }
         free(stack->array);
+        
         stack->array = tab;
         stack->array[++stack->top] = item;
         stack->capacity *= 2;
@@ -51,23 +56,25 @@ void push(Stack* stack, int item)
 }
  
 // Function to remove an item from stack.  It decreases top by 1
-int pop(Stack* stack)
+fun_tree* pop(Stack* stack)
 {
     if (isEmpty(stack))
-        return -1;
+        return NULL;
     return stack->array[stack->top--];
 }
 
-int peak(Stack* stack)
+fun_tree* peak(Stack* stack)
 {
     if (isEmpty(stack))
-        return -1;
+        return NULL;
     return stack->array[stack->top];
 }
 
 void free_stack(Stack *s){
 
     free(s->array);
+    
     free(s);
+    
     
 }
