@@ -12,7 +12,7 @@ Dic * get_labels_dic(char * tracee_name,char * regex){
     /* excecute nm */
     int cr = system( cmd );
     if ( cr != 0 ){
-        exit(1);
+        return NULL;
     }
 
     
@@ -82,7 +82,7 @@ Dic * get_labels_dic_o(char * tracee_name){
     int cr = system( cmd );
     if ( cr != 0 ){ /* Unexpected behaviour */
         fprintf( stderr, "Impossible de lancer la commande : %s\n", cmd);
-        return NULL;
+        exit(1);
     }
     
     /* Open results */
@@ -148,7 +148,7 @@ size_t get_start(char * tracee_name){
 bool isCall(size_t instruction){
     unsigned int opcode1 = instruction & 0x000000FF;
     /* opcodes used to detect a call */
-    return (opcode1 == 0x9A || opcode1 == 0xE8 || opcode1 == 0xFF);
+    return (opcode1 == 0xE8);
 }
 
 bool isRet(size_t address,unsigned ret_address){
