@@ -76,7 +76,6 @@ int start_tracer_s(pid_t child){
     int status;     /* for the wait */
     int error= 0;
     int sys_call;
-    int ret;
 
     error = waitpid(child,&status,0);
     if(error == -1){

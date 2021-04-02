@@ -6,17 +6,12 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-
-/* POSIX */
 #include <unistd.h>
 #include <sys/user.h>
 #include <sys/wait.h>
-
-/* Linux */
 #include <syscall.h>
 #include <sys/reg.h>
 #include <sys/ptrace.h>
-
 #include <stdlib.h>
 #include <sys/types.h> 
 #include <sys/wait.h>
@@ -27,6 +22,7 @@
 #include <assert.h>
 #include <sys/user.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 /**
  * Creates a table that contains all sycalls from "syscall.txt"
