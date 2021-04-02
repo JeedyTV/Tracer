@@ -40,8 +40,16 @@ void print_tree(fun_tree *tree){
         print_tree(tree->subtree[i]);
     }
 
+}
 
-    
+
+void update_subtree(fun_tree *tree){
+    tree->depth--;
+
+    for(int i = 0 ; i<tree->sub_size ; i++){
+        update_subtree(tree->subtree[i]);
+    }
+    return;
 }
 
 void delete_fun_tree(fun_tree *tree){

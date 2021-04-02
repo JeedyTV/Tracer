@@ -230,10 +230,12 @@ int start_tracer_p(pid_t child,char *programname){
     if(!isEmpty(stack)){
         int nbre = stack->top+1;
         for(int i=0;i<nbre;i++){
-                fun_tree * unpoped = pop(stack);
+            fun_tree * unpoped = pop(stack);
+            if (unpoped->prev){
                 unpoped->prev->nb_instructions += unpoped->nb_instructions;
-                add(unpoped->prev->subtree, unpoped->subtree);
-                unpoped->subtree = NULL;
+                update_subtree(unpoped);
+                unpoped->depth++;
+            }
         }
     }
 

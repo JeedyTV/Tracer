@@ -27,10 +27,12 @@ fun_tree *new_fun_tree(char *label, size_t depth, fun_tree *prev,unsigned long r
 
 void print_tree(fun_tree *tree);
 
-void delete_fun_tree(fun_tree *tree);
-
 void add_rec(fun_tree *tree);
 
 void add(fun_tree *tree, fun_tree *element);
+
+void update_subtree(fun_tree *tree);
+
+void delete_fun_tree(fun_tree *tree);
 
 #endif
