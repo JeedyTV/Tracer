@@ -83,6 +83,7 @@ int start_tracer_s(pid_t child){
         return error;
     }
 
+    /* Force kernel to set bit 7 in the signal */
     error = ptrace(PTRACE_SETOPTIONS, child, 0, PTRACE_O_TRACESYSGOOD);
 	if (error == -1) {
 		return error;
@@ -91,13 +92,14 @@ int start_tracer_s(pid_t child){
     sys_call = ptrace(PTRACE_PEEKUSER, child, sizeof(long) * ORIG_EAX);
     printf("syscall: %s\n",syscall[sys_call]);
 
-    while (1)
+    while (true)
     {
         error = wait_syscall(child);
         if(error != 0){
             break;
         }
 
+        /* Retrieve the value of the syscall execution*/
         sys_call = ptrace(PTRACE_PEEKUSER, child, sizeof(long) * ORIG_EAX);
         printf("syscall: %s\n",syscall[sys_call]);
 
@@ -107,8 +109,6 @@ int start_tracer_s(pid_t child){
 		}
 
         ptrace(PTRACE_PEEKUSER, child, sizeof(long) * EAX);
-		
-
     }
 
     free_link(syscall);
