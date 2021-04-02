@@ -82,7 +82,7 @@ Dic * get_labels_dic_o(char * tracee_name){
     int cr = system( cmd );
     if ( cr != 0 ){ /* Unexpected behaviour */
         fprintf( stderr, "Impossible de lancer la commande : %s\n", cmd);
-        exit(1);
+        return NULL;
     }
     
     /* Open results */
