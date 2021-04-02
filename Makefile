@@ -34,5 +34,4 @@ clean:
 	rm -rf *.o
 
 comp:
-	@rm -f src.tar.gz
-	@tar czvf src.tar.gz *.c *.h *.pdf
+	@./make_archive.sh
