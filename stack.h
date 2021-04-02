@@ -1,3 +1,8 @@
+/** @file stack.h
+ * A stack data structure for fun_tree elements.
+ * @see @file fun_tree.h
+ */
+
 #ifndef STACK
 #define STACK
 #include <stdio.h>
