@@ -21,11 +21,52 @@
 
 #define BUFFER_SIZE 250
 
+/**
+ * Stores in a dictionnary the name of every function called by a process
+ * and their linked address using nm command.
+ * @param tracee_name the name of the process
+ * @param regex nm options
+ * @return a dictionnary
+ */
 Dic * get_labels_dic(char * tracee_name,char * regex);
+
+/**
+ * Stores in a dictionnary the name of every function called by a process
+ * and their linked address using objdump command.
+ * @param tracee_name the name of the process
+ * @return a dictionnary
+ */
 Dic * get_labels_dic_o(char * tracee_name);
+
+/**
+ * Starts a process.
+ * @param tracee_name the name of the process
+ * @return address of the entry point of the process
+ */
 size_t get_start(char * tracee_name);
+
+/**
+ * Detectes a call instruction.
+ * @param intruction opcode of an instruction
+ * @return true if is a call function, false otherwise.
+ */
 bool isCall(size_t instruction);
-bool isRet(size_t adresse,unsigned ret_addresse);
+
+/**
+ * Detectes a return instruction.
+ * @param address address of an instruction
+ * @param ret_address address the expected return
+ * @return true if is a return function, false otherwise.
+ */
+bool isRet(size_t address,unsigned ret_address);
+
+/**
+ * Traces a process instruction by instruction
+ * and print all its functions according to the protocol.
+ * @param child process id of the traced process
+ * @param programname name of the process
+ * @return 0 if no problem.
+ */
 int start_tracer_p(pid_t child,char *programname);
 
 #endif

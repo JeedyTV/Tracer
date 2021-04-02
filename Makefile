@@ -34,5 +34,5 @@ clean:
 	rm -rf *.o
 
 comp:
-	@rm -f src.tar.xz
-	@tar -cJf src.tar.xz *.c *.h *.pdf
+	@rm -f src.tar.gz
+	@tar czvf src.tar.gz *.c *.h *.pdf

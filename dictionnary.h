@@ -1,3 +1,7 @@
+/** @file dictionnary.h
+ *  A dictionnary data structure.
+ */
+
 #ifndef DICTIONNARY
 #define DICTIONNARY
 #include <stdlib.h>
